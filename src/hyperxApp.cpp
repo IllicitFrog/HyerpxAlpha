@@ -1,20 +1,25 @@
-#include <wx/event.h>
-#include <wx/icon.h>
-#include <wx/taskbar.h>
-#include <wx/textctrl.h>
-#include "hyperxFrame.h"
 #include "hyperxApp.h"
-#include "alpha_w.h"
+#include "hyperxFrame.h"
+#include <sys/param.h>
 
 // App
 hyperxApp::hyperxApp() {}
 hyperxApp::~hyperxApp() {}
 
 bool hyperxApp::OnInit() {
-  hyperx_frame *m_frame =
-      new hyperx_frame(_T("HyperX"), wxPoint(50, 50), wxSize(400, 600));
+  wxImage::AddHandler(new wxPNGHandler);
+  char resolved_path[256];
+  realpath(argv[0], resolved_path);
+  wxString c(resolved_path);
+  c.erase(c.end() - 6, c.end());
+  try {
+    hyperxFrame *m_frame =
+        new hyperxFrame(_T("HyperX"), wxDefaultPosition, wxSize(400, 400), c);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    return false;
+  }
   SetTopWindow(m_frame);
-  headset *m_headset = new headset;
   return true;
 }
 // start the application from here

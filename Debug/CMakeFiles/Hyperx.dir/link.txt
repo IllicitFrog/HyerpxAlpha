@@ -1,0 +1,1 @@
+/usr/bin/clang++  -pthread -g CMakeFiles/Hyperx.dir/src/hyperxApp.cpp.o CMakeFiles/Hyperx.dir/src/hyperxFrame.cpp.o CMakeFiles/Hyperx.dir/src/SwitchCtrl.cpp.o CMakeFiles/Hyperx.dir/src/dialog.cpp.o -o /home/cory/Workspace/Hyperx/bin/Hyperx  -pthread -lwx_gtk3u_core-3.2 -lwx_baseu-3.2 /usr/lib/libhidapi-hidraw.so.0.14.0 
