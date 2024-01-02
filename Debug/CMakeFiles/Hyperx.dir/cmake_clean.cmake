@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Hyperx.dir/src/hyperxApp.cpp.o.d"
   "CMakeFiles/Hyperx.dir/src/hyperxFrame.cpp.o"
   "CMakeFiles/Hyperx.dir/src/hyperxFrame.cpp.o.d"
+  "CMakeFiles/Hyperx.dir/src/pulse.cpp.o"
+  "CMakeFiles/Hyperx.dir/src/pulse.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

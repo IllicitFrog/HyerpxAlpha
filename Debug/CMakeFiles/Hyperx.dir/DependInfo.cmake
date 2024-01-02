@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/cory/Workspace/Hyperx/src/dialog.cpp" "CMakeFiles/Hyperx.dir/src/dialog.cpp.o" "gcc" "CMakeFiles/Hyperx.dir/src/dialog.cpp.o.d"
   "/home/cory/Workspace/Hyperx/src/hyperxApp.cpp" "CMakeFiles/Hyperx.dir/src/hyperxApp.cpp.o" "gcc" "CMakeFiles/Hyperx.dir/src/hyperxApp.cpp.o.d"
   "/home/cory/Workspace/Hyperx/src/hyperxFrame.cpp" "CMakeFiles/Hyperx.dir/src/hyperxFrame.cpp.o" "gcc" "CMakeFiles/Hyperx.dir/src/hyperxFrame.cpp.o.d"
+  "/home/cory/Workspace/Hyperx/src/pulse.cpp" "CMakeFiles/Hyperx.dir/src/pulse.cpp.o" "gcc" "CMakeFiles/Hyperx.dir/src/pulse.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

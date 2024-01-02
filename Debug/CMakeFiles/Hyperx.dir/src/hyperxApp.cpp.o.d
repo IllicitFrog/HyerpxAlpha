@@ -396,6 +396,9 @@ CMakeFiles/Hyperx.dir/src/hyperxApp.cpp.o: \
   /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/ctime \
   /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/bits/parse_numbers.h \
   /usr/include/wx-3.2/wx/taskbar.h /usr/include/wx-3.2/wx/gtk/taskbar.h \
+  /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/atomic \
+  /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/bits/atomic_base.h \
+  /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/bits/atomic_lockfree_defines.h \
   /home/cory/Workspace/Hyperx/include/SwitchCtrl.h \
   /home/cory/Workspace/Hyperx/include/alpha_w.h \
   /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/cstring \
@@ -413,6 +416,23 @@ CMakeFiles/Hyperx.dir/src/hyperxApp.cpp.o: \
   /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/sstream \
   /usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/13.2.1/../../../../include/c++/13.2.1/bits/sstream.tcc \
   /usr/include/libudev.h /usr/include/sys/sysmacros.h \
-  /usr/include/bits/sysmacros.h /usr/include/sys/param.h \
-  /usr/include/bits/param.h /usr/include/linux/param.h \
-  /usr/include/asm/param.h /usr/include/asm-generic/param.h
+  /usr/include/bits/sysmacros.h \
+  /home/cory/Workspace/Hyperx/include/pulse.h \
+  /usr/include/pulse/introspect.h /usr/lib/clang/16/include/inttypes.h \
+  /usr/include/inttypes.h /usr/include/pulse/operation.h \
+  /usr/include/pulse/cdecl.h /usr/include/pulse/def.h \
+  /usr/include/sys/time.h /usr/include/pulse/sample.h \
+  /usr/include/sys/param.h /usr/include/bits/param.h \
+  /usr/include/linux/param.h /usr/include/asm/param.h \
+  /usr/include/asm-generic/param.h /usr/include/pulse/gccmacro.h \
+  /usr/include/pulse/version.h /usr/include/pulse/context.h \
+  /usr/include/pulse/mainloop-api.h /usr/include/pulse/proplist.h \
+  /usr/include/pulse/channelmap.h /usr/include/pulse/volume.h \
+  /usr/include/pulse/format.h /usr/include/pulse/pulseaudio.h \
+  /usr/include/pulse/direction.h /usr/include/pulse/stream.h \
+  /usr/include/pulse/subscribe.h /usr/include/pulse/scache.h \
+  /usr/include/pulse/error.h /usr/include/pulse/xmalloc.h \
+  /usr/include/pulse/utf8.h /usr/include/pulse/thread-mainloop.h \
+  /usr/include/pulse/mainloop.h /usr/include/pulse/mainloop-signal.h \
+  /usr/include/pulse/util.h /usr/include/pulse/timeval.h \
+  /usr/include/pulse/rtclock.h

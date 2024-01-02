@@ -232,6 +232,18 @@ PKG_CONFIG_ARGN:STRING=
 //pkg-config executable
 PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 
+//Path to a file.
+PULSEAUDIO_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+PULSEAUDIO_LIBRARY:FILEPATH=/usr/lib/libpulse.so
+
+//Path to a library.
+PULSEAUDIO_MAINLOOP_LIBRARY:FILEPATH=/usr/lib/libpulse-mainloop-glib.so
+
+//The directory containing a CMake configuration file for PulseAudio.
+PulseAudio_DIR:PATH=/usr/lib/cmake/PulseAudio
+
 //The directory containing a CMake configuration file for hidapi.
 hidapi_DIR:PATH=/usr/lib/cmake/hidapi
 

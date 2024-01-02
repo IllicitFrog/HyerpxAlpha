@@ -225,6 +225,30 @@ src/hyperxFrame.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Hyperx.dir/build.make CMakeFiles/Hyperx.dir/src/hyperxFrame.cpp.s
 .PHONY : src/hyperxFrame.cpp.s
 
+src/pulse.o: src/pulse.cpp.o
+.PHONY : src/pulse.o
+
+# target to build an object file
+src/pulse.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Hyperx.dir/build.make CMakeFiles/Hyperx.dir/src/pulse.cpp.o
+.PHONY : src/pulse.cpp.o
+
+src/pulse.i: src/pulse.cpp.i
+.PHONY : src/pulse.i
+
+# target to preprocess a source file
+src/pulse.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Hyperx.dir/build.make CMakeFiles/Hyperx.dir/src/pulse.cpp.i
+.PHONY : src/pulse.cpp.i
+
+src/pulse.s: src/pulse.cpp.s
+.PHONY : src/pulse.s
+
+# target to generate assembly for a file
+src/pulse.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Hyperx.dir/build.make CMakeFiles/Hyperx.dir/src/pulse.cpp.s
+.PHONY : src/pulse.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -246,6 +270,9 @@ help:
 	@echo "... src/hyperxFrame.o"
 	@echo "... src/hyperxFrame.i"
 	@echo "... src/hyperxFrame.s"
+	@echo "... src/pulse.o"
+	@echo "... src/pulse.i"
+	@echo "... src/pulse.s"
 .PHONY : help
 
 

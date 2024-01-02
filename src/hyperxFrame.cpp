@@ -3,15 +3,26 @@
 #include "hyperxApp.h"
 #include <iomanip>
 
+#define IsinkName                                                              \
+  alsa_output.usb - HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001 - 00.analog - \
+      stereo
+#define IsourceName                                                            \
+  alsa_output.usb - HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001 - 00.analog - \
+      stereo.monitor
+
 hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
                          const wxSize &size, const wxChar *runDir)
     : wxFrame(nullptr, wxID_ANY, title, pos, size), m_headset(new headset),
-      wanted(false), m_runDir(runDir) {
+      wanted(false), m_runDir(runDir), running(true),
+      pa_manager("alsa_output.usb-HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001-"
+                 "00.analog-stereo",
+                 "alsa_input.usb-HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001-"
+                 "00.mono-fallback") {
 
   if (!m_headset->init()) {
     dialog *error =
         new dialog(_T("HyperX Cloud Alpha Unavailable"), wxDefaultPosition,
-                   wxSize(400, 250), m_runDir + _T("img/error.png"), true);
+                   wxSize(440, 150), m_runDir + _T("img/poweredOff.png"));
     delete m_headset;
     throw std::runtime_error("Failed to initialize headset");
   }
@@ -21,15 +32,44 @@ hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
   timer = new wxTimer();
   timer->Bind(wxEVT_TIMER, &hyperxFrame::on_timer, this);
   timer->Start(10000);
+
+  taskBarIcon.Bind(wxEVT_TASKBAR_RIGHT_DOWN, &hyperxFrame::showMenu, this);
   setTaskIcon();
-  taskBarIcon.Bind(wxEVT_TASKBAR_LEFT_DCLICK, &hyperxFrame::showWindow, this);
+  taskBarIcon.Bind(wxEVT_TASKBAR_LEFT_DOWN, &hyperxFrame::showWindow, this);
 
   createFrame();
 
+  pa_manager.setVolumeSourceChangeCallback(
+      [this](unsigned int Tvolume, bool isMute) {
+        wxGetApp().CallAfter([this, Tvolume, isMute]() {
+          if (isMute) {
+            micMute->SetValue(true);
+            micMuted = true;
+          } else {
+            micMute->SetValue(false);
+            micMuted = false;
+          }
+          this->micVolume->SetValue(Tvolume);
+        });
+      });
+
+  pa_manager.setVolumeSinkChangeCallback(
+      [this](unsigned int Tvolume, bool isMute) {
+        wxGetApp().CallAfter([this, Tvolume, isMute]() {
+          if (isMute) {
+            mute->SetValue(true);
+            muted = true;
+          } else {
+            mute->SetValue(false);
+            muted = false;
+          }
+          this->volume->SetValue(Tvolume);
+        });
+      });
+
+  pt = std::thread([this]() { pa_manager.start(); });
   m_headset->send_command(commands::CONNECTION_STATE);
 }
-
-hyperxFrame::~hyperxFrame() { delete m_headset; }
 
 // Status update from headset
 void hyperxFrame::on_timer(wxTimerEvent &event) {
@@ -47,11 +87,46 @@ void hyperxFrame::showWindow(wxTaskBarIconEvent &event) {
     (IsShown()) ? this->Hide() : this->Show();
 
   } else {
-    dialog *poweroff =
-        new dialog(_T("Headset Off"), wxDefaultPosition, wxSize(400, 250),
-                   m_runDir + "img/poweredOff.png", false, 10000);
-    wanted = true;
+    if (!dialogShown) {
+      dialogShown = true;
+      dialog *poweroff =
+          new dialog(_T("Headset Off"), wxDefaultPosition, wxSize(440, 150),
+                     m_runDir + "img/poweredOff.png");
+      wanted = true;
+    }
+    dialogShown = false;
   }
+}
+
+void hyperxFrame::showMenu(wxTaskBarIconEvent &event) {
+  enum { hOPEN = 2525, hMUTE, hQUIT };
+  taskMenu = new wxMenu();
+  if (connection_status::CONNECTED == status) {
+    taskMenu->Append(hOPEN, (IsShown()) ? _T("Hide") : _T("Show"), _T(""),
+                     wxITEM_NORMAL);
+    taskMenu->Append(hMUTE, (micMuted) ? _T("Unmute") : _T("Mute"), _T(""),
+                     wxITEM_NORMAL);
+  } else {
+    taskMenu->Append(wxID_ANY, _T("Power Off"), _T(""), wxITEM_NORMAL);
+  }
+  taskMenu->AppendSeparator();
+  taskMenu->Append(hQUIT, _T("Quit"), _T(""), wxITEM_NORMAL);
+  taskMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, [this](wxCommandEvent &event) {
+    switch (event.GetId()) {
+    case hQUIT:
+      this->quit(event);
+      break;
+    case hMUTE:
+      pa_manager.muteSource(!this->micMuted);
+      break;
+    case hOPEN:
+      (IsShown()) ? this->Hide() : this->Show();
+      break;
+    default:;
+      break;
+    }
+  });
+  taskBarIcon.PopupMenu(taskMenu);
 }
 
 void hyperxFrame::micSwitch(wxCommandEvent &event) {
@@ -66,17 +141,38 @@ void hyperxFrame::voiceSwitch(wxCommandEvent &event) {
       : m_headset->send_command(commands::VOICE_PROMPTS_OFF);
 }
 
-void hyperxFrame::quit(wxCommandEvent &event) { this->Destroy(); }
+void hyperxFrame::quit(wxCommandEvent &event) {
+  pa_manager.stop();
+  running = false;
+  m_headset->send_command(commands::PING);
+  if (timer->IsRunning()) {
+    timer->Stop();
+  }
+  t.join();
+  pt.join();
+  delete m_headset;
+  this->Destroy();
+}
 
-void hyperxFrame::hide(wxCommandEvent &event) { this->Hide(); }
+void hyperxFrame::on_micMute(wxCommandEvent &event) {
+  if (event.GetEventType() == 10321) {
+    pa_manager.muteSource(micMute->GetValue());
+  }
+}
 
-void hyperxFrame::on_micMute(wxCommandEvent &event) {}
+void hyperxFrame::on_mute(wxCommandEvent &event) {
+  if (event.GetEventType() == 10321) {
+    pa_manager.muteSink(mute->GetValue());
+  }
+}
 
-void hyperxFrame::on_micVolume(wxCommandEvent &event) {}
+void hyperxFrame::on_volume(wxCommandEvent &event) {
+  pa_manager.setSinkVolume(volume->GetValue());
+}
 
-void hyperxFrame::on_mute(wxCommandEvent &event) {}
-
-void hyperxFrame::on_volume(wxCommandEvent &event) {}
+void hyperxFrame::on_micVolume(wxCommandEvent &event) {
+  pa_manager.setSourceVolume(micVolume->GetValue());
+}
 
 void hyperxFrame::sleepChoice(wxCommandEvent &event) {
   switch (sleepTimer->GetSelection()) {
@@ -123,6 +219,9 @@ void hyperxFrame::setTaskIcon() {
 
 void hyperxFrame::createFrame() {
   // main Layout
+
+  this->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent &event) { this->Hide(); });
+  this->Bind(wxEVT_ICONIZE, [this](wxIconizeEvent &event) { this->Hide(); });
   const auto margin = FromDIP(5);
   auto mainSizer = new wxBoxSizer(wxHORIZONTAL);
   wxPanel *panel = new wxPanel(this, wxID_ANY);
@@ -135,6 +234,7 @@ void hyperxFrame::createFrame() {
                                  wxSize(400, 150));
   auto mainControls = new wxBoxSizer(wxHORIZONTAL);
 
+  statusLabel = new wxStaticText(panel, wxID_ANY, _T("Battery Life Remaining"));
   // mic audio
   auto audioBox = new wxStaticBoxSizer(wxVERTICAL, panel, _T("Audio Controls"));
   micMuteLabel = new wxStaticText(panel, wxID_ANY, _T("Microphone Mute"));
@@ -145,7 +245,7 @@ void hyperxFrame::createFrame() {
   micVolume = new wxSlider(panel, wxID_ANY, 0, 0, 100, wxDefaultPosition,
                            wxDefaultSize, wxSL_MIN_MAX_LABELS);
   micVolume->SetToolTip(_T("Set Microphone Volume"));
-  micVolume->Bind(wxEVT_SLIDER, &hyperxFrame::on_micVolume, this);
+  micVolume->Bind(wxEVT_SCROLL_THUMBRELEASE, &hyperxFrame::on_micVolume, this);
   // headphone audio
   muteLabel = new wxStaticText(panel, wxID_ANY, _T("Headphone Mute"));
   mute = new wxSwitchCtrl(panel, (int)wxID_ANY, false);
@@ -155,7 +255,7 @@ void hyperxFrame::createFrame() {
   volume = new wxSlider(panel, wxID_ANY, 0, 0, 100, wxDefaultPosition,
                         wxDefaultSize, wxSL_MIN_MAX_LABELS);
   volume->SetToolTip(_T("Set Headphone Volume"));
-  volume->Bind(wxEVT_SLIDER, &hyperxFrame::on_volume, this);
+  volume->Bind(wxEVT_SCROLL_THUMBRELEASE, &hyperxFrame::on_volume, this);
 
   // add to audio box
   audioBox->Add(micMuteLabel, 0, wxALIGN_RIGHT | wxALL, margin);
@@ -200,7 +300,8 @@ void hyperxFrame::createFrame() {
   quitButton = new wxButton(panel, wxID_EXIT, _T("Quit"));
   quitButton->Bind(wxEVT_BUTTON, &hyperxFrame::quit, this);
   hideButton = new wxButton(panel, wxID_ANY, _T("Minimize"));
-  hideButton->Bind(wxEVT_BUTTON, &hyperxFrame::hide, this);
+  hideButton->Bind(wxEVT_BUTTON,
+                   [this](wxCommandEvent &event) { this->Hide(); });
 
   buttonBox->Add(featureBox, 0, wxEXPAND | wxALL, margin);
   buttonBox->Add(quitButton, 0, wxEXPAND | wxALL, margin);
@@ -210,6 +311,7 @@ void hyperxFrame::createFrame() {
   mainControls->Add(buttonBox, 1, wxALL, margin);
 
   sizer->Add(logo, 0, wxLEFT | wxRIGHT, margin);
+  sizer->Add(statusLabel, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, margin);
   sizer->Add(mainControls, 0, wxEXPAND | wxALL, margin);
 
   panel->SetSizer(sizer);
@@ -225,6 +327,8 @@ void hyperxFrame::onConnect() {
   m_headset->send_command(commands::STATUS_REQUEST);
   status = connection_status::CONNECTED;
   setTaskIcon();
+  pa_manager.getSinkVolume();
+  pa_manager.getSourceVolume();
   if (wanted) {
     Show();
     wanted = false;
@@ -234,7 +338,7 @@ void hyperxFrame::onConnect() {
 
 void hyperxFrame::read_loop() {
   unsigned char buffer[32];
-  while (true) {
+  while (running) {
     m_headset->read(buffer);
     wxGetApp().CallAfter([this, &buffer]() {
       if (buffer[0] == 0x21 && buffer[1] == 0xbb) {
@@ -291,6 +395,9 @@ void hyperxFrame::read_loop() {
         // Battery Check
         case 0x0b:
           battery = (unsigned int)buffer[3];
+          statusLabel->SetLabel("Battery: " + std::to_string(battery) +
+                                "% -- " + std::to_string(battery * 3) +
+                                "Hours Remaining");
           setTaskIcon();
           break;
 
@@ -364,5 +471,4 @@ void hyperxFrame::read_loop() {
       }
     });
   }
-  t.join();
 }
