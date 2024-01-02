@@ -3,19 +3,12 @@
 #include "hyperxApp.h"
 #include <iomanip>
 
-#define IsinkName                                                              \
-  alsa_output.usb - HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001 - 00.analog - \
-      stereo
-#define IsourceName                                                            \
-  alsa_output.usb - HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001 - 00.analog - \
-      stereo.monitor
-
 hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
                          const wxSize &size, const wxChar *runDir)
     : wxFrame(nullptr, wxID_ANY, title, pos, size), m_headset(new headset),
       wanted(false), m_runDir(runDir), running(true),
       pa_manager("alsa_output.usb-HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001-"
-                 "00.analog-stereo",
+                 "00.iec958-stereo",
                  "alsa_input.usb-HP__Inc_HyperX_Cloud_Alpha_Wireless_00000001-"
                  "00.mono-fallback") {
 
