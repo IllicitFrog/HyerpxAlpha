@@ -143,6 +143,7 @@ void hyperxFrame::quit(wxCommandEvent &event) {
   }
   t.join();
   pt.join();
+  taskBarIcon.RemoveIcon();
   delete m_headset;
   this->Destroy();
 }
