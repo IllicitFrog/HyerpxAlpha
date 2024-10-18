@@ -14,7 +14,7 @@ bool hyperxApp::OnInit() {
   c.erase(c.end() - 6, c.end());
   try {
     hyperxFrame *m_frame =
-        new hyperxFrame(_T("HyperX"), wxDefaultPosition, wxSize(400, 400), c);
+        new hyperxFrame(_T("HyperX Alpha"), wxDefaultPosition, wxSize(200, 400), c);
   } catch (std::exception &e) {
     std::cout << e.what() << std::endl;
     return false;

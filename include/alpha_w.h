@@ -1,10 +1,8 @@
 #ifndef __ALPHA_W_H
 #define __ALPHA_W_H
 
-#include <array>
 #include <cstring>
 #include <hidapi/hidapi.h>
-#include <iomanip>
 #include <iostream>
 #include <libudev.h>
 #include <stdexcept>
@@ -15,7 +13,7 @@
 #define MAX_STR 255
 
 enum connection_status { DISCONNECTED = 0, CONNECTED = 1 };
-enum sleep_time { S10 = 10, S20 = 20, S30 = 30 };
+enum sleep_time { S0 = 0, S10 = 10, S20 = 20, S30 = 30 };
 
 enum class commands : int {
   STATUS_REQUEST = 0x21bb0b00,
@@ -30,6 +28,7 @@ enum class commands : int {
   MICROPHONE_MONITOR = 0x21bb1001,
   MICROPHONE_MONITOR_OFF = 0x21bb1000,
   SLEEP_STATE = 0x21bb0700,
+  SLEEP_TIMER_OFF = 0x21bb1200,
   SLEEP_TIMER_10 = 0x21bb120a,
   SLEEP_TIMER_20 = 0x21bb1214,
   SLEEP_TIMER_30 = 0x21bb121e
