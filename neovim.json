@@ -1,1 +1,0 @@
-{"cargo":{"dap_name":"lldb"},"cmake":{"build_dir":"{cwd}\/build\/{os}-{build_type}","cmd":"cmake","dap_name":"codelldb","build_type":"Debug","target":"Hyperx","args":{"configure":["-D","CMAKE_EXPORT_COMPILE_COMMANDS=1"]}}}
