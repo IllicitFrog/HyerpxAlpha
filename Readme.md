@@ -1,14 +1,9 @@
-It seems I couldn't retrieve the image from the `assets` directory. Please make sure the file exists and the path is correct. Let's proceed with drafting the README content excluding the image for now.
-
----
 
 # HyerpxAlpha
 
 Linux software for the Hyperx Alpha Wireless.
 
-```
 ![HyerpxAlpha](assets/HyerpxAlpha.png)
-```
 
 ## Description
 
