@@ -1,20 +1,22 @@
-
 # HyerpxAlpha
 
 Linux software for the Hyperx Alpha Wireless.
 
-![HyerpxAlpha](assets/Hyerpx.png)
+![HyerpxAlpha](assets/Hyperx.png)
 
 ## Description
 
-HyerpxAlpha is a Linux-based software designed to enhance the functionality and performance of the Hyperx Alpha Wireless headset. This software provides a seamless experience for managing and customizing your headset's features.
+A simple application to provite the missing features on linux
 
-## Features
+- Battery Monitoring
+- Sleep Timer
+- Mic Monitor
+- Voice Control
 
-- Customizable audio settings
-- Battery status monitoring
-- Firmware updates
-- Profile management
+## Dependencies
+
+- wxWidgets
+- hidapi
 
 ## Installation
 
@@ -29,18 +31,18 @@ To install HyerpxAlpha, follow these steps:
    cd HyerpxAlpha
    ```
 3. Build the project using CMake:
+
    ```
-   mkdir build
-   cd build
-   cmake ..
-   make
+   cmake -S . -B build
+   cmake --build build
    ```
 
 ## Usage
 
 After installation, you can run the HyerpxAlpha software with the following command:
+
 ```
-./HyerpxAlpha
+bin/Hyerpx
 ```
 
 ## Contributing
@@ -50,7 +52,3 @@ Contributions are welcome! Please fork this repository and submit pull requests.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-Once the image issue is resolved, you can add the image to the README by including the following line where appropriate:
