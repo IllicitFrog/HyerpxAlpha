@@ -3,7 +3,7 @@
 
 Linux software for the Hyperx Alpha Wireless.
 
-![HyerpxAlpha](assets/HyerpxAlpha.png)
+![HyerpxAlpha](assets/Hyerpx.png)
 
 ## Description
 
