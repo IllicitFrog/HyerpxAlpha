@@ -5,7 +5,7 @@
 hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
                          const wxSize &size, const wxChar *runDir)
     : wxFrame(nullptr, wxID_ANY, title, pos, size), m_headset(new headset),
-      wanted(false), m_runDir(runDir), running(true) {
+      m_runDir(runDir), running(true) {
 
   if (!m_headset->init()) {
     dialog *error =
@@ -19,11 +19,14 @@ hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
   // headset polling
   timer = new wxTimer();
   timer->Bind(wxEVT_TIMER, &hyperxFrame::on_timer, this);
-  timer->Start(10000);
 
-  taskBarIcon.Bind(wxEVT_TASKBAR_RIGHT_DOWN, &hyperxFrame::showMenu, this);
-  setTaskIcon();
-  taskBarIcon.Bind(wxEVT_TASKBAR_LEFT_DOWN, &hyperxFrame::showWindow, this);
+  if (false) {
+    taskAvailable = true;
+    taskBarIcon = new wxTaskBarIcon();
+    taskBarIcon->Bind(wxEVT_TASKBAR_RIGHT_DOWN, &hyperxFrame::showMenu, this);
+    taskBarIcon->Bind(wxEVT_TASKBAR_LEFT_DOWN, &hyperxFrame::showWindow, this);
+    setTaskIcon();
+  }
 
   createFrame();
 
@@ -32,40 +35,20 @@ hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
 
 // Status update from headset
 void hyperxFrame::on_timer(wxTimerEvent &event) {
-  if (status == connection_status::CONNECTED) {
-    m_headset->send_command(commands::STATUS_REQUEST);
-    m_headset->send_command(commands::PING);
-  } else {
-    m_headset->send_command(commands::CONNECTION_STATE);
-  }
+  m_headset->send_command(commands::STATUS_REQUEST);
+  m_headset->send_command(commands::PING);
 }
 
 // Left Click Taskbar
 void hyperxFrame::showWindow(wxTaskBarIconEvent &event) {
-  if (status == connection_status::CONNECTED) {
-    (IsShown()) ? this->Hide() : this->Show();
-
-  } else {
-    if (!dialogShown) {
-      dialogShown = true;
-      dialog *poweroff =
-          new dialog(_T("Headset Off"), wxDefaultPosition, wxSize(440, 150),
-                     m_runDir + "img/poweredOff.png");
-      wanted = true;
-    }
-    dialogShown = false;
-  }
+  (IsShown()) ? this->Hide() : this->Show();
 }
 
 void hyperxFrame::showMenu(wxTaskBarIconEvent &event) {
   enum { hOPEN = 2525, hQUIT };
   taskMenu = new wxMenu();
-  if (connection_status::CONNECTED == status) {
-    taskMenu->Append(hOPEN, (IsShown()) ? _T("Hide") : _T("Show"), _T(""),
-                     wxITEM_NORMAL);
-  } else {
-    taskMenu->Append(wxID_ANY, _T("Power Off"), _T(""), wxITEM_NORMAL);
-  }
+  taskMenu->Append(hOPEN, (IsShown()) ? _T("Hide") : _T("Show"), _T(""),
+                   wxITEM_NORMAL);
   taskMenu->AppendSeparator();
   taskMenu->Append(hQUIT, _T("Quit"), _T(""), wxITEM_NORMAL);
   taskMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, [this](wxCommandEvent &event) {
@@ -80,7 +63,7 @@ void hyperxFrame::showMenu(wxTaskBarIconEvent &event) {
       break;
     }
   });
-  taskBarIcon.PopupMenu(taskMenu);
+  taskBarIcon->PopupMenu(taskMenu);
 }
 
 void hyperxFrame::micSwitch(wxCommandEvent &event) {
@@ -102,7 +85,10 @@ void hyperxFrame::quit(wxCommandEvent &event) {
     timer->Stop();
   }
   t.join();
-  taskBarIcon.RemoveIcon();
+  if (taskAvailable) {
+    taskBarIcon->RemoveIcon();
+    delete taskBarIcon;
+  }
   delete m_headset;
   this->Destroy();
 }
@@ -110,53 +96,64 @@ void hyperxFrame::quit(wxCommandEvent &event) {
 void hyperxFrame::sleepChoice(wxCommandEvent &event) {
   switch (sleepTimer->GetSelection()) {
   case 0:
-    m_headset->send_command(commands::SLEEP_TIMER_30);
+    m_headset->send_command(commands::SLEEP_TIMER_10);
     break;
   case 1:
     m_headset->send_command(commands::SLEEP_TIMER_20);
     break;
   case 2:
-    m_headset->send_command(commands::SLEEP_TIMER_10);
+    m_headset->send_command(commands::SLEEP_TIMER_30);
     break;
-  case 3:
-    m_headset->send_command(commands::SLEEP_TIMER_OFF);
+  default:
     break;
   }
 }
 
 void hyperxFrame::setTaskIcon() {
-  if (status == connection_status::CONNECTED) {
-    switch (battery) {
-    case 0 ... 10:
-      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray0.png")));
-      break;
-    case 11 ... 30:
-      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray20.png")));
-      break;
-    case 31 ... 50:
-      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray40.png")));
-      break;
-    case 51 ... 70:
-      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray60.png")));
-      break;
-    case 71 ... 90:
-      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray80.png")));
-      break;
-    case 91 ... 100:
-      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray100.png")));
-      break;
+  if (taskAvailable) {
+
+    if (status == connection_status::CONNECTED) {
+      switch (battery) {
+      case 0 ... 10:
+        wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray0.png")));
+        break;
+      case 11 ... 30:
+        wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray20.png")));
+        break;
+      case 31 ... 50:
+        wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray40.png")));
+        break;
+      case 51 ... 70:
+        wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray60.png")));
+        break;
+      case 71 ... 90:
+        wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray80.png")));
+        break;
+      case 91 ... 100:
+        wicon = wxIcon(wxIconLocation(m_runDir + _T("img/tray100.png")));
+        break;
+      }
+      taskBarIcon->SetIcon(wicon, std::to_string(battery * 3) +
+                                      " Hours Remaining(" +
+                                      std::to_string(battery) + "%)");
+    } else {
+      wicon = wxIcon(wxIconLocation(m_runDir + _T("img/traydc.png")));
+      taskBarIcon->SetIcon(wicon, "Power Off");
     }
-    taskBarIcon.SetIcon(wicon, std::to_string(battery * 3) + " Hours Remaining(" + std::to_string(battery) + "%)");
-  } else {
-    wicon = wxIcon(wxIconLocation(m_runDir + _T("img/traydc.png")));
-    taskBarIcon.SetIcon(wicon, "Power Off");
   }
 }
 
 void hyperxFrame::createFrame() {
   // main Layout
 
-  this->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent &event) { this->Hide(); });
+  this->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent &event) {
+    if (taskAvailable) {
+      this->Hide();
+    } else {
+      wxCommandEvent quitEvent;
+      this->quit(quitEvent);
+    }
+  });
   this->Bind(wxEVT_ICONIZE, [this](wxIconizeEvent &event) { this->Hide(); });
   const auto margin = FromDIP(4);
   auto mainSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -169,6 +166,8 @@ void hyperxFrame::createFrame() {
   auto logo = new wxStaticBitmap(panel, wxID_ANY, logoImg, wxDefaultPosition,
                                  wxSize(200, 70));
 
+  connectedLabel = new wxStaticText(panel, wxID_ANY, _T("Connected"));
+
   // Feature
   auto featureBox = new wxStaticBoxSizer(wxVERTICAL, panel, _T("Features"));
   // sleepTimer
@@ -178,17 +177,20 @@ void hyperxFrame::createFrame() {
   sleepTimer->SetSelection(0);
   sleepTimer->SetToolTip(_T("Set Sleep Timer"));
   sleepTimer->Bind(wxEVT_CHOICE, &hyperxFrame::sleepChoice, this);
+  sleepTimer->Disable();
   // voicePrompt
   voicePromptLabel = new wxStaticText(panel, wxID_ANY, _T("Voice Prompt"));
   voicePrompt = new wxSwitchCtrl(panel, wxID_ANY, false);
   voicePrompt->SetToolTip(_T("Enable Voice Prompt"));
   voicePrompt->Bind(wxEVT_SWITCH, &hyperxFrame::voiceSwitch, this);
+  voicePrompt->Disable();
 
   // micMonitor
   micMonitorLabel = new wxStaticText(panel, wxID_ANY, _T("Mic Monitor"));
   micMonitor = new wxSwitchCtrl(panel, wxID_ANY, false);
   micMonitor->SetToolTip(_T("Enable Mic Monitor"));
   micMonitor->Bind(wxEVT_SWITCH, &hyperxFrame::micSwitch, this);
+  micMonitor->Disable();
 
   // add to feature box
   featureBox->Add(sleepTimerLabel, 0, wxEXPAND | wxALL, margin);
@@ -201,36 +203,48 @@ void hyperxFrame::createFrame() {
   auto buttonBox = new wxBoxSizer(wxVERTICAL);
   quitButton = new wxButton(panel, wxID_EXIT, _T("Quit"));
   quitButton->Bind(wxEVT_BUTTON, &hyperxFrame::quit, this);
-  hideButton = new wxButton(panel, wxID_ANY, _T("Minimize"));
-  hideButton->Bind(wxEVT_BUTTON,
-                   [this](wxCommandEvent &event) { this->Hide(); });
 
   buttonBox->Add(featureBox, 0, wxEXPAND | wxALL, margin);
   buttonBox->Add(quitButton, 0, wxEXPAND | wxALL, margin);
-  buttonBox->Add(hideButton, 0, wxEXPAND | wxALL, margin);
-
+  if (taskAvailable) {
+    hideButton = new wxButton(panel, wxID_ANY, _T("Minimize"));
+    hideButton->Bind(wxEVT_BUTTON,
+                     [this](wxCommandEvent &event) { this->Hide(); });
+    buttonBox->Add(hideButton, 0, wxEXPAND | wxALL, margin);
+  }
 
   sizer->Add(logo, 0, wxLEFT | wxRIGHT, margin);
+  sizer->Add(connectedLabel, 0, wxLEFT | wxRIGHT, margin);
   sizer->Add(buttonBox, 0, wxEXPAND | wxALL, margin);
 
   panel->SetSizer(sizer);
   mainSizer->Add(panel, 1, wxALL, 8);
   this->SetSizerAndFit(mainSizer);
+  if (!taskAvailable) {
+    this->Show();
+  }
 }
 
 void hyperxFrame::onConnect() {
-  m_headset->send_command(commands::VOICE_STATE);
-  m_headset->send_command(commands::MIC_MONITOR_STATE);
-  m_headset->send_command(commands::SLEEP_STATE);
-  m_headset->send_command(commands::MICROPHONE_STATE);
   m_headset->send_command(commands::STATUS_REQUEST);
+  m_headset->send_command(commands::SLEEP_STATE);
   status = connection_status::CONNECTED;
+  connectedLabel->SetLabel(_T("Connected"));
+  sleepTimer->Enable();
+  voicePrompt->Enable();
+  micMonitor->Enable();
   setTaskIcon();
-  if (wanted) {
-    Show();
-    wanted = false;
-  }
   timer->Start(30000);
+}
+
+void hyperxFrame::onDisconnect() {
+  status = connection_status::DISCONNECTED;
+  connectedLabel->SetLabel(_T("Disconnected"));
+  sleepTimer->Disable();
+  voicePrompt->Disable();
+  micMonitor->Disable();
+  setTaskIcon();
+  timer->Stop();
 }
 
 void hyperxFrame::read_loop() {
@@ -242,11 +256,7 @@ void hyperxFrame::read_loop() {
         switch (buffer[2]) {
         case 0x03:
           if (buffer[3] == 0x01) {
-            status = connection_status::DISCONNECTED;
-            setTaskIcon();
-            if (IsShown()) {
-              Hide();
-            }
+            onDisconnect();
           } else if (buffer[3] == 0x02) {
             onConnect();
           }
@@ -259,11 +269,8 @@ void hyperxFrame::read_loop() {
         // READ SLEEP STATE SETTTING
         case 0x07:
           switch (buffer[3]) {
-          case 0x00:
-            sleep = sleep_time::S0;
-            sleepTimer->SetSelection(3);
           case 0x0a:
-            sleep = sleep_time::S30;
+            sleep = sleep_time::S10;
             sleepTimer->SetSelection(0);
             break;
           case 0x14:
@@ -271,7 +278,7 @@ void hyperxFrame::read_loop() {
             sleepTimer->SetSelection(1);
             break;
           case 0x1e:
-            sleep = sleep_time::S10;
+            sleep = sleep_time::S30;
             sleepTimer->SetSelection(2);
             break;
           }
@@ -312,8 +319,6 @@ void hyperxFrame::read_loop() {
         // RESPONSE TO SLEEP TIMER SET
         case 0x12:
           switch (buffer[3]) {
-          case 0x00:
-            sleep = S0;
           case 0x0a:
             sleep = S10;
             break;
@@ -350,7 +355,7 @@ void hyperxFrame::read_loop() {
         case 0x24:
           if (buffer[3] == 0x01) {
             status = connection_status::DISCONNECTED;
-            setTaskIcon();
+            onDisconnect();
           } else if (buffer[3] == 0x02) {
             onConnect();
           }

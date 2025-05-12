@@ -1,10 +1,10 @@
 #ifndef __HYPERXFRAME_H
 #define __HYPERXFRAME_H
 
+#include <atomic>
 #include <thread>
 #include <wx/taskbar.h>
 #include <wx/wx.h>
-#include <atomic>
 
 #include "SwitchCtrl.h"
 #include "alpha_w.h"
@@ -12,17 +12,19 @@
 // main window
 class hyperxFrame : public wxFrame {
 public:
-  hyperxFrame(const wxChar *title, const wxPoint &pos, const wxSize &size, const wxChar *runDir);
+  hyperxFrame(const wxChar *title, const wxPoint &pos, const wxSize &size,
+              const wxChar *runDir);
 
 private:
   // Main layout
-  wxTaskBarIcon taskBarIcon;
+  wxTaskBarIcon *taskBarIcon;
+  bool taskAvailable = false;
   wxMenu *taskMenu;
   wxIcon wicon;
   wxButton *quitButton;
   wxButton *hideButton;
   wxString m_runDir;
-  bool dialogShown = false;
+  wxStaticText *connectedLabel;
 
   // features box
   wxStaticText *sleepTimerLabel;
@@ -42,14 +44,14 @@ private:
   bool voice;
   bool mic_monitor;
   unsigned long identifier;
-  const wxArrayString choices = {_T("30 Minutes"), _T("20 Minutes"),
-                                 _T("10 Minutes"), _T("Never")};
-
+  const wxArrayString choices = {_T("10 Minutes"), _T("20 Minutes"),
+                                 _T("30 Minutes")};
 
   // callback functions for controls
   void createFrame();
   void setTaskIcon();
   void onConnect();
+  void onDisconnect();
   void showWindow(wxTaskBarIconEvent &);
   void showMenu(wxTaskBarIconEvent &);
   void sleepChoice(wxCommandEvent &);
@@ -58,12 +60,10 @@ private:
   void quit(wxCommandEvent &);        // quit button
 
   // timer Event 5 seconds
-  wxTimer *dialogTimer;
   wxTimer *timer;
   void on_timer(wxTimerEvent &);
 
   // read loop for headset
-  bool wanted;
   std::atomic<bool> running;
   std::thread t;
   void read_loop();
