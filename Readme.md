@@ -1,8 +1,25 @@
+05/12/2025:
+
+- fixed issue with sleep timer not working
+- legacy systray only supported, disabled systray when unavailable
+
+Todo:
+
+- build release version
+- open to suggestions or pull request
+- also if anyone wants to add different icons for systray, I will embed them in release version(as long as they are my bad ones I won't bother)
+
 # HyerpxAlpha
 
 Linux software for the Hyperx Alpha Wireless.
 
+This is Extremely Alpha, it is hap hazardly being maintained.
+
+Not my main git, Sorry if I don't respond in a timely fashion.
+
 ![HyerpxAlpha](assets/Hyperx.png)
+
+Settings persist while not running so can be edited and then closed.
 
 ## Description
 
@@ -38,6 +55,14 @@ To install HyerpxAlpha, follow these steps:
    ```
 
 ## Usage
+
+**Permissions are required to access the Hyperx device.**
+
+Editing /etc/udev/rules.d/50-hidraw.rules with:
+
+```
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="03f0", MODE="0660", TAG+="uaccess"
+```
 
 After installation, you can run the HyerpxAlpha software with the following command:
 
