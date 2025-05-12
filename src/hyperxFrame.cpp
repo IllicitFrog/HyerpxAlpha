@@ -20,7 +20,7 @@ hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
   timer = new wxTimer();
   timer->Bind(wxEVT_TIMER, &hyperxFrame::on_timer, this);
 
-  if (false) {
+  if (wxTaskBarIcon::IsAvailable()) {
     taskAvailable = true;
     taskBarIcon = new wxTaskBarIcon();
     taskBarIcon->Bind(wxEVT_TASKBAR_RIGHT_DOWN, &hyperxFrame::showMenu, this);
