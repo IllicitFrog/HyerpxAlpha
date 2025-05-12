@@ -3,10 +3,9 @@
 #include "hyperxApp.h"
 
 hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
-                         const wxSize &size, const wxChar *runDir)
+                         const wxSize &size, const wxChar *runDir, wxApp *app)
     : wxFrame(nullptr, wxID_ANY, title, pos, size), m_headset(new headset),
-      m_runDir(runDir), running(true) {
-
+      m_runDir(runDir), running(true), app(app) {
   if (!m_headset->init()) {
     dialog *error =
         new dialog(_T("HyperX Cloud Alpha Unavailable"), wxDefaultPosition,
@@ -251,7 +250,7 @@ void hyperxFrame::read_loop() {
   unsigned char buffer[32];
   while (running) {
     m_headset->read(buffer);
-    wxGetApp().CallAfter([this, &buffer]() {
+    app->CallAfter([this, &buffer]() {
       if (buffer[0] == 0x21 && buffer[1] == 0xbb) {
         switch (buffer[2]) {
         case 0x03:

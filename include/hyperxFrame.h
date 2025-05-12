@@ -13,9 +13,11 @@
 class hyperxFrame : public wxFrame {
 public:
   hyperxFrame(const wxChar *title, const wxPoint &pos, const wxSize &size,
-              const wxChar *runDir);
+              const wxChar *runDir, wxApp *app);
 
 private:
+
+  wxApp *app;
   // Main layout
   wxTaskBarIcon *taskBarIcon;
   bool taskAvailable = false;

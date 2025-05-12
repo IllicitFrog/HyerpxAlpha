@@ -13,8 +13,8 @@ bool hyperxApp::OnInit() {
   wxString c(resolved_path);
   c.erase(c.end() - 6, c.end());
   try {
-    hyperxFrame *m_frame =
-        new hyperxFrame(_T("HyperX Alpha"), wxDefaultPosition, wxSize(200, 400), c);
+    hyperxFrame *m_frame = new hyperxFrame(
+        _T("HyperX Alpha"), wxDefaultPosition, wxSize(200, 400), c, this);
   } catch (std::exception &e) {
     std::cout << e.what() << std::endl;
     return false;
@@ -23,4 +23,4 @@ bool hyperxApp::OnInit() {
   return true;
 }
 // start the application from here
-wxIMPLEMENT_APP(hyperxApp);
+// wxIMPLEMENT_APP(hyperxApp);
