@@ -13,7 +13,7 @@
 #define MAX_STR 255
 
 enum connection_status { DISCONNECTED = 0, CONNECTED = 1 };
-enum sleep_time {S10 = 10, S20 = 20, S30 = 30 };
+enum sleep_time { S10 = 10, S20 = 20, S30 = 30 };
 
 enum class commands : int {
   STATUS_REQUEST = 0x21bb0b00,
@@ -47,7 +47,9 @@ public:
     hid_exit();
   }
 
-  void read(unsigned char *buffer) { hid_read(handle, buffer, 32); }
+  void read(unsigned char *buffer) {
+    hid_read_timeout(handle, buffer, 32, 1000);
+  }
 
   void send_command(commands cmd) {
     unsigned char bytes[4];
