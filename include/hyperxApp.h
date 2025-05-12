@@ -6,13 +6,14 @@
 
 class hyperxApp : public wxApp {
 public:
-  hyperxApp();
+  hyperxApp(bool);
   ~hyperxApp();
 
   virtual bool OnInit();
 
 private:
   hyperxFrame *m_frame;
+  bool systray;
 };
 
 #endif

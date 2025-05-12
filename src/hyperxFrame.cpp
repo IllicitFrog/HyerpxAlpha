@@ -3,9 +3,10 @@
 #include "hyperxApp.h"
 
 hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
-                         const wxSize &size, const wxChar *runDir, wxApp *app)
+                         const wxSize &size, const wxChar *runDir, wxApp *app,
+                         bool useTray)
     : wxFrame(nullptr, wxID_ANY, title, pos, size), m_headset(new headset),
-      m_runDir(runDir), running(true), app(app) {
+      m_runDir(runDir), running(true), app(app), useTray(useTray) {
   if (!m_headset->init()) {
     dialog *error =
         new dialog(_T("HyperX Cloud Alpha Unavailable"), wxDefaultPosition,
@@ -19,7 +20,7 @@ hyperxFrame::hyperxFrame(const wxChar *title, const wxPoint &pos,
   timer = new wxTimer();
   timer->Bind(wxEVT_TIMER, &hyperxFrame::on_timer, this);
 
-  if (wxTaskBarIcon::IsAvailable()) {
+  if (wxTaskBarIcon::IsAvailable() && useTray) {
     taskAvailable = true;
     taskBarIcon = new wxTaskBarIcon();
     taskBarIcon->Bind(wxEVT_TASKBAR_RIGHT_DOWN, &hyperxFrame::showMenu, this);
