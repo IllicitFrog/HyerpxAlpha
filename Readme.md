@@ -70,6 +70,12 @@ After installation, you can run the HyerpxAlpha software with the following comm
 bin/Hyerpx
 ```
 
+or add --systray to start in tray(only works with legacy systray)
+
+```
+bin/Hyperx --systray
+```
+
 ## Contributing
 
 Contributions are welcome! Please fork this repository and submit pull requests.
