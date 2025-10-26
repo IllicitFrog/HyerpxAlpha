@@ -302,6 +302,7 @@ void hyperxFrame::read_loop() {
         // Battery Check
         case 0x0b:
           battery = (unsigned int)buffer[3];
+          connectedLabel->SetLabel("Battery: " + std::to_string(battery) + "% ");
           setTaskIcon();
           break;
 
