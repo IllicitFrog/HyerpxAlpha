@@ -34,6 +34,11 @@ A simple application to provite the missing features on linux
 
 - wxWidgets
 - hidapi
+On ubuntu:
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install libwxgtk3.2-dev wx3.2-headers libhidapi-dev libhidapi-libusb0 libhidapi-hidraw0
+```
 
 ## Installation
 
@@ -61,7 +66,7 @@ To install HyerpxAlpha, follow these steps:
 Editing /etc/udev/rules.d/50-hidraw.rules with:
 
 ```
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="03f0", MODE="0660", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="03f0", MODE="0660", GROUP="plugdev", TAG+="uaccess"
 ```
 
 After installation, you can run the HyerpxAlpha software with the following command:
